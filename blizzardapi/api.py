@@ -50,7 +50,12 @@ class Api:
 
     def _response_handler(self, response):
         """Handle the response."""
-        return response.json()
+        out = response.json()
+        if 'Last-Modified' in response.headers:
+            # We could return them all, but this Last Modified is the specific 
+            # header that lets us know when the next update will be available
+            out['Last-Modified'] = response.headers['Last-Modified']
+        return out
 
     def _request_handler(self, url, region, query_params):
         """Handle the request."""
@@ -62,7 +67,6 @@ class Api:
             query_params["access_token"] = self._access_token
 
         response = self._session.get(url, params=query_params)
-
         return self._response_handler(response)
 
     def _format_api_url(self, resource, region):
